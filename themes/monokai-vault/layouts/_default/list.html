@@ -1,0 +1,18 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+{{ if .Content }}<div class="page-intro">{{ .Content }}</div>{{ end }}
+<ul class="post-list">
+  {{ range .Paginator.Pages }}
+  <li>
+    <a href="{{ .RelPermalink }}" class="post-link">{{ .Title }}</a>
+    {{ if .Params.summary }}<p class="summary">{{ .Params.summary }}</p>{{ end }}
+    <div class="meta">
+      <span>{{ .Date.Format "2006-01-02" }}</span>
+      {{ with .Params.tags }} | <span class="tags">{{ delimit . ", " }}</span>{{ end }}
+      {{ if $.Site.Params.showReadingTime }} | <span>{{ .ReadingTime }} min</span>{{ end }}
+    </div>
+  </li>
+  {{ end }}
+</ul>
+{{ template "_internal/pagination.html" . }}
+{{ end }}

@@ -1,0 +1,17 @@
+<header class="site-header">
+  <div class="inner">
+    {{ if .Site.Params.showTitleInHeader }}
+      <a class="logo" href="/">{{ .Site.Title }}</a>
+    {{ else }}
+      <a class="logo hidden" href="/" aria-label="Home"></a>
+    {{ end }}
+    <nav>
+      <ul>
+        {{ range .Site.Menus.main }}
+        <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+        {{ end }}
+      </ul>
+    </nav>
+  <!-- Blog search handled inside blog list hero -->
+  </div>
+</header>

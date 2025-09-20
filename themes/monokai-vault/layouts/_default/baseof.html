@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  {{ $isBlog := or (eq .Section "blog") (hasPrefix .RelPermalink "/blog/") }}
+  <title>{{ if .IsHome }}Mlaynedere Hacks{{ else if $isBlog }}Blog - Mlaynedere Hacks{{ else }}{{ .Title }} - Mlaynedere Hacks{{ end }}</title>
+  <meta name="description" content="{{ with .Params.summary }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}" />
+  <link rel="stylesheet" href="/css/style.css" />
+  {{ if .Site.Params.enableSearch }}<link rel="preload" as="fetch" href="/index.json" crossorigin />{{ end }}
+</head>
+<body>
+  {{ partial "header.html" . }}
+  <main class="container">
+    {{ block "main" . }}{{ end }}
+  </main>
+  {{ partial "footer.html" . }}
+  <script src="/js/site.js"></script>
+</body>
+</html>

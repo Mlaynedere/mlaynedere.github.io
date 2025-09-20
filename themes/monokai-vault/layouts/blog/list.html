@@ -1,0 +1,28 @@
+{{ define "main" }}
+<section class="blog-hero">
+  <h1 class="blog-title">Blog</h1>
+  <p class="hero-sub">Hack / enumerate / escalate / report. Search or scroll.</p>
+  <div class="hero-search-wrapper">
+    <div class="hero-search-inner">
+      <input id="blogSearchInput" type="text" placeholder="Search posts ( / to focus )" aria-label="Search posts" />
+      <span class="search-icon" aria-hidden="true">🔎</span>
+    </div>
+    <div class="search-stats" id="searchStats"></div>
+  </div>
+</section>
+
+<div id="postsContainer" class="post-grid">
+  {{ range where .Pages "Title" "ne" "(Legacy) Hack The Box" }}
+    <article class="post-card" data-title="{{ .Title | lower }}" data-summary="{{ .Params.summary | default "" | lower }}" data-content="{{ (.Plain | truncate 280) | lower }}">
+      <a class="card-link" href="{{ .RelPermalink }}" aria-label="Read {{ .Title }}"></a>
+      <header>
+        <h2 class="card-title">{{ .Title }}</h2>
+        <div class="card-meta"><span class="date">{{ .Date.Format "2006-01-02" }}</span>{{ if $.Site.Params.showReadingTime }}<span class="sep">•</span><span>{{ .ReadingTime }}m</span>{{ end }}</div>
+      </header>
+      {{ if .Params.summary }}<p class="card-summary">{{ .Params.summary }}</p>{{ end }}
+      {{ with .Params.tags }}<div class="card-tags">{{ range . }}<span class="tag tag-{{ . | urlize }}">{{ . }}</span>{{ end }}</div>{{ end }}
+    </article>
+  {{ end }}
+</div>
+<div id="noResults" class="no-results" style="display:none;">No matching posts.</div>
+{{ end }}

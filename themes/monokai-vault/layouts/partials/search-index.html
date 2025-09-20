@@ -1,0 +1,8 @@
+<script>
+window.__SEARCH_INDEX = [
+{{- range $i, $p := .Site.RegularPages -}}
+{{- if $i }},{{ end -}}
+{"title":{{ $p.Title | jsonify }},"summary":{{ $p.Params.summary | jsonify }},"content":{{ (replaceRE "\n" " " ($p.Plain | truncate 400)) | jsonify }},"permalink":{{ $p.RelPermalink | jsonify }}}
+{{- end -}}
+];
+</script>

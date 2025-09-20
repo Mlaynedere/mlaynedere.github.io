@@ -1,0 +1,15 @@
+{{ define "main" }}
+<aside id="miniTOC" class="mini-toc" aria-label="Page section navigation"></aside>
+<article>
+  <h1>{{ .Title }}</h1>
+  <div class="meta">
+    <span>{{ .Date.Format "2006-01-02" }}</span>
+    {{ with .Params.tags }} | <span class="tags">{{ delimit . ", " }}</span>{{ end }}
+    {{ if .Site.Params.showReadingTime }} | <span>{{ .ReadingTime }} min read</span>{{ end }}
+  </div>
+  {{ if .Params.cover }}
+    <img class="cover" src="{{ .Params.cover }}" alt="cover image" />
+  {{ end }}
+  <div class="content">{{ .Content }}</div>
+</article>
+{{ end }}
