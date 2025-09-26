@@ -67,7 +67,7 @@ hr { border:0; border-top:1px solid var(--border); margin:2rem 0; }
 .mini-toc-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.12rem; }
 .mini-toc-item { position:relative; }
 .mini-toc-item.depth-1 { position:relative; }
-.mini-toc-item.depth-1 > a { font-weight:600; color: var(--accent5); font-size:.86rem; letter-spacing:.35px; padding-left:1.4rem; }
+.mini-toc-item.depth-1 > a { position:relative; font-weight:600; color: var(--accent5); font-size:.86rem; letter-spacing:.35px; padding-left:1.5rem; }
 .mini-toc-item.depth-2 > a { font-weight:500; font-size:.72rem; padding-left:1.9rem; color: var(--accent3); opacity:.95; position: relative; }
 .mini-toc-item.depth-2 > a:before { content:""; position:absolute; left:1.2rem; top:50%; width:4px; height:4px; background:var(--accent3); border-radius:50%; transform:translateY(-50%); opacity:.75; }
 .mini-toc-item a { display:block; padding:.45rem .65rem; border-radius:10px; text-decoration:none; line-height:1.16; }
@@ -77,8 +77,8 @@ hr { border:0; border-top:1px solid var(--border); margin:2rem 0; }
 .mini-toc-collapsible.open .mini-toc-children { display:flex; flex-direction:column; gap:.10rem; }
 .mini-toc-collapsible { display:block; }
 .mini-toc-collapsible > a { display:block; }
-.mini-toc-arrow { position:absolute; left:.55rem; top:.62rem; display:inline-block; width:.9rem; text-align:center; line-height:1; cursor:pointer; background:transparent; border-radius:0; font-size:12px; color:var(--accent5); font-weight:700; user-select:none; }
-.mini-toc-arrow:hover, .mini-toc-arrow:focus { outline:none; color:var(--accent2); transform:scale(1.05); }
+.mini-toc-arrow { position:absolute; left:.45rem; top:50%; transform:translateY(-56%); display:inline-block; width:.85rem; text-align:center; line-height:1; cursor:pointer; background:transparent; border-radius:0; font-size:12px; color:var(--accent5); font-weight:700; user-select:none; }
+.mini-toc-arrow:hover, .mini-toc-arrow:focus { outline:none; color:var(--accent2); transform:translateY(-56%) scale(1.05); }
 .mini-toc-arrow:focus-visible { box-shadow:0 0 0 2px rgba(102,217,239,.6); }
 /* footer controls removed in simplified version */
 

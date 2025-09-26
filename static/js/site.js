@@ -99,7 +99,8 @@
           arrow.textContent = '▸'; // collapsed by default (chevron)
 
           liForThisH2.classList.add('mini-toc-collapsible');
-          liForThisH2.insertBefore(arrow, parentLink);
+          // Place the arrow INSIDE the link so it aligns to the link height and doesn't move when children expand
+          parentLink.insertBefore(arrow, parentLink.firstChild);
 
           const update = () => { arrow.textContent = liForThisH2.classList.contains('open') ? '▾' : '▸'; };
           const toggle = (e) => { e.preventDefault(); liForThisH2.classList.toggle('open'); update(); };
