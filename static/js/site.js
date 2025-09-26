@@ -4,17 +4,20 @@
   const blogInput = document.getElementById('blogSearchInput');
   const postsContainer = document.getElementById('postsContainer');
   const stats = document.getElementById('searchStats');
-  let indexLoaded = false; let INDEX = [];
+  let INDEX = [];
   if(blogInput){
-    fetch('/index.json').then(r=>r.json()).then(j=>{ INDEX=j; indexLoaded=true; stats && (stats.textContent = `${INDEX.length} posts`); });
+    fetch('/index.json')
+      .then(r=>r.json())
+      .then(j=>{ INDEX=j; if(stats) stats.textContent = `${INDEX.length} posts`; });
     const deb=(fn,ms)=>{let t;return (...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)};};
     function filter(){
       const q = blogInput.value.trim().toLowerCase();
       let shown = 0;
       postsContainer.querySelectorAll('.post-card').forEach(card=>{
         if(!q){ card.style.display='flex'; shown++; return; }
-        const hay = card.dataset.title+" "+card.dataset.summary+" "+card.dataset.content;
-        if(hay.includes(q)){ card.style.display='flex'; shown++; } else card.style.display='none';
+        const hay = `${card.dataset.title} ${card.dataset.summary} ${card.dataset.content}`.toLowerCase();
+        card.style.display = hay.includes(q) ? 'flex' : 'none';
+        if(hay.includes(q)) shown++;
       });
       if(stats) stats.textContent = q? `${shown} match${shown===1?'':'es'}` : `${INDEX.length} posts`;
       const none = document.getElementById('noResults');
@@ -46,115 +49,77 @@
   }
   document.addEventListener('DOMContentLoaded', addCopyButtons);
 
-  // MINI FLOATING TOC (H2 + toggle H3) without shifting layout
+  // SIMPLE TOC: H2 items; add arrow and toggle only if H3 exists under that H2
   document.addEventListener('DOMContentLoaded', () => {
-    const tocRoot = document.getElementById('miniTOC');
-    if(!tocRoot) return;
+    const toc = document.getElementById('miniTOC');
+    if(!toc) return;
     const content = document.querySelector('article .content');
-    if(!content) return;
-    const hs = content.querySelectorAll('h2, h3');
-    if(!hs.length) { tocRoot.classList.add('hidden'); return; }
-    const list = document.createElement('ul'); list.className='mini-toc-list';
-    const title = document.createElement('div'); title.className='mini-toc-title'; title.textContent='SECTIONS';
-    tocRoot.appendChild(title);
-    let currentParent=null;
-    hs.forEach(h=>{
-      if(!h.id) h.id = h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
-      if(h.tagName==='H2'){
-        const li=document.createElement('li'); li.className='mini-toc-item depth-1';
-        const a=document.createElement('a'); a.href='#'+h.id; a.textContent=h.textContent.trim();
-        li.appendChild(a);
-        list.appendChild(li);
-        currentParent=li;
-      } else { // H3
-        if(!currentParent) return;
-        let childWrap=currentParent.querySelector('.mini-toc-children');
-        if(!childWrap){ childWrap=document.createElement('div'); childWrap.className='mini-toc-children'; currentParent.appendChild(childWrap); }
-        const subLi=document.createElement('li'); subLi.className='mini-toc-item depth-2';
-        const a=document.createElement('a'); a.href='#'+h.id; a.textContent=h.textContent.trim();
-        subLi.appendChild(a); childWrap.appendChild(subLi);
+    if(!content){ toc.classList.add('hidden'); return; }
+
+    const all = Array.from(content.querySelectorAll('h2, h3'));
+    if(!all.length){ toc.classList.add('hidden'); return; }
+
+    const title = document.createElement('div');
+    title.className = 'mini-toc-title';
+    title.textContent = 'SECTIONS';
+    toc.appendChild(title);
+
+    const root = document.createElement('ul');
+    root.className = 'mini-toc-list';
+
+    const slug = (t)=> t.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+    const makeLink = (h)=>{
+      if(!h.id) h.id = slug(h.textContent);
+      const a = document.createElement('a');
+      a.href = `#${h.id}`;
+      a.textContent = h.textContent.trim();
+      return a;
+    };
+
+    let currentLi = null;
+    let currentChildren = null;
+
+    all.forEach(h => {
+      if(h.tagName === 'H2'){
+        currentLi = document.createElement('li');
+        currentLi.className = 'mini-toc-item depth-1';
+        currentLi.appendChild(makeLink(h));
+        root.appendChild(currentLi);
+        currentChildren = null;
+      } else if(h.tagName === 'H3' && currentLi){
+        if(!currentChildren){
+          // first H3 seen for this H2: add arrow and children list
+          currentChildren = document.createElement('ul');
+          currentChildren.className = 'mini-toc-children';
+
+          const liForThisH2 = currentLi; // capture in closure
+          const parentLink = liForThisH2.querySelector('a');
+          const arrow = document.createElement('span');
+          arrow.className = 'mini-toc-arrow';
+          arrow.textContent = '▸'; // collapsed by default (chevron)
+
+          liForThisH2.classList.add('mini-toc-collapsible');
+          liForThisH2.insertBefore(arrow, parentLink);
+
+          const update = () => { arrow.textContent = liForThisH2.classList.contains('open') ? '▾' : '▸'; };
+          const toggle = (e) => { e.preventDefault(); liForThisH2.classList.toggle('open'); update(); };
+          arrow.addEventListener('click', toggle);
+          arrow.setAttribute('tabindex','0');
+          arrow.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') toggle(e); });
+          update();
+
+          liForThisH2.appendChild(currentChildren);
+        }
+
+        const sub = document.createElement('li');
+        sub.className = 'mini-toc-item depth-2';
+        sub.appendChild(makeLink(h));
+        currentChildren.appendChild(sub);
       }
     });
-    tocRoot.appendChild(list);
 
-    // collapse toggle (only add controls to parents that actually have children)
-    const headerOffset = 70; // approximate sticky header height
-    function smoothScrollTo(el){
-      const rect = el.getBoundingClientRect();
-      const y = window.scrollY + rect.top - headerOffset - 6;
-      window.scrollTo({top:y, behavior:'smooth'});
-    }
-    const parents = Array.from(list.querySelectorAll('.mini-toc-item.depth-1'));
-    parents.forEach((parent,idx)=>{
-      const kids = parent.querySelector('.mini-toc-children');
-      const link = parent.querySelector('> a');
-      if(!link) return;
-      if(kids){
-        parent.classList.add('mini-toc-collapsible');
-        // collapse all by default except first collapsible
-        if(idx===0){ parent.classList.add('open'); }
-        const existingArrow = parent.querySelector('.mini-toc-arrow');
-        let arrow = existingArrow;
-        if(!arrow){
-          arrow=document.createElement('span');
-          arrow.className='mini-toc-arrow';
-          arrow.setAttribute('role','button');
-          arrow.setAttribute('aria-label','Toggle subsection');
-          arrow.textContent='›';
-          link.prepend(arrow);
-        }
-        link.addEventListener('click',e=>{
-          e.preventDefault();
-          const tgt=document.getElementById(link.getAttribute('href').slice(1));
-          if(tgt) smoothScrollTo(tgt);
-        });
-        arrow.addEventListener('click',e=>{
-          e.preventDefault(); e.stopPropagation();
-          parent.classList.toggle('open');
-          arrow.setAttribute('aria-expanded', parent.classList.contains('open'));
-        });
-      } else {
-        // plain link
-        link.addEventListener('click',e=>{
-          e.preventDefault();
-          const tgt=document.getElementById(link.getAttribute('href').slice(1));
-          if(tgt) smoothScrollTo(tgt);
-        });
-      }
-    });
-    // Sub-item navigation
-    list.querySelectorAll('.mini-toc-item.depth-2 > a').forEach(a=>{
-      a.addEventListener('click',e=>{
-        e.preventDefault();
-        const tgt=document.getElementById(a.getAttribute('href').slice(1));
-        if(tgt) smoothScrollTo(tgt);
-        const parent=a.closest('.mini-toc-collapsible');
-        if(parent && !parent.classList.contains('open')) parent.classList.add('open');
-      });
-    });
-    // Ensure regular internal anchor clicks elsewhere also respect offset
-    document.querySelectorAll('a[href^="#"]').forEach(a=>{
-      a.addEventListener('click',ev=>{
-        const hash=a.getAttribute('href');
-        if(hash.length>1){
-          const target=document.getElementById(hash.slice(1));
-          if(target){ ev.preventDefault(); smoothScrollTo(target); history.replaceState(null,'',hash); }
-        }
-      });
-    });
-
-    // Active state via IntersectionObserver
-  const observer = new IntersectionObserver(entries=>{
-      entries.forEach(en=>{
-        if(en.isIntersecting){
-          const id=en.target.id;
-          list.querySelectorAll('.mini-toc-item').forEach(i=>i.classList.remove('active'));
-          const active = list.querySelector(`a[href="#${id}"]`);
-            if(active){ active.parentElement.classList.add('active'); const parent=active.closest('.mini-toc-children'); if(parent){ parent.parentElement.classList.add('active'); }}
-        }
-      });
-  },{rootMargin:'0px 0px -70% 0px', threshold:.1});
-    hs.forEach(h=>observer.observe(h));
+    if(!root.children.length){ toc.classList.add('hidden'); return; }
+    toc.appendChild(root);
   });
 
 })();
