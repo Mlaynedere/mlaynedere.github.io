@@ -17,7 +17,8 @@
       <a class="card-link" href="{{ .RelPermalink }}" aria-label="Read {{ .Title }}"></a>
       <header>
         <h2 class="card-title">{{ .Title }}</h2>
-        <div class="card-meta"><span class="date">{{ .Date.Format "2006-01-02" }}</span>{{ if $.Site.Params.showReadingTime }}<span class="sep">•</span><span>{{ .ReadingTime }}m</span>{{ end }}</div>
+        {{ $readingTime := default .ReadingTime .Params.readingTime }}
+        <div class="card-meta"><span class="date">{{ .Date.Format "2006-01-02" }}</span>{{ if and $.Site.Params.showReadingTime $readingTime }}<span class="sep">•</span><span>{{ $readingTime }}m</span>{{ end }}</div>
       </header>
       {{ if .Params.summary }}<p class="card-summary">{{ .Params.summary }}</p>{{ end }}
       {{ with .Params.tags }}<div class="card-tags">{{ range . }}<span class="tag tag-{{ . | urlize }}">{{ . }}</span>{{ end }}</div>{{ end }}

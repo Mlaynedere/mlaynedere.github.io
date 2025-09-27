@@ -5,7 +5,8 @@
   <div class="meta">
     <span>{{ .Date.Format "2006-01-02" }}</span>
     {{ with .Params.tags }} | <span class="tags">{{ delimit . ", " }}</span>{{ end }}
-    {{ if .Site.Params.showReadingTime }} | <span>{{ .ReadingTime }} min read</span>{{ end }}
+    {{ $readingTime := default .ReadingTime .Params.readingTime }}
+    {{ if and .Site.Params.showReadingTime $readingTime }} | <span>{{ $readingTime }} min read</span>{{ end }}
   </div>
   {{ if .Params.cover }}
     <img class="cover" src="{{ .Params.cover }}" alt="cover image" />
